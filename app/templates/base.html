@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Harvest IQ{% endblock %} | Fresh from the Farm</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top shadow-sm" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+      <span class="brand-logo">🌾</span>
+      <span class="brand-name">Harvest<span class="text-success">IQ</span></span>
+    </a>
+
+    <!-- Search bar -->
+    <form class="d-none d-lg-flex flex-grow-1 mx-4" action="{{ url_for('search.search') }}" method="GET">
+      <div class="input-group">
+        <input type="text" class="form-control search-input" name="q" placeholder="Search fresh produce, farmers..." value="{{ request.args.get('q','') }}"/>
+        <button class="btn btn-success px-3" type="submit"><i class="fas fa-search"></i></button>
+      </div>
+    </form>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('products.list_products') }}"><i class="fas fa-store me-1"></i>Shop</a>
+        </li>
+
+        {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="{{ url_for('cart.view_cart') }}">
+              <i class="fas fa-shopping-cart"></i>
+              {% set cart = session.get('cart', {}) %}
+              {% if cart %}
+                <span class="cart-badge">{{ cart.values()|sum }}</span>
+              {% endif %}
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+              <img src="{{ url_for('static', filename='images/profiles/' + (current_user.profile_image or 'default_profile.jpg')) }}"
+                   class="avatar-sm rounded-circle" alt="Profile" onerror="this.src='https://ui-avatars.com/api/?name={{ current_user.username }}&background=2e7d32&color=fff'"/>
+              {{ current_user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><a class="dropdown-item" href="{{ url_for('users.dashboard') }}"><i class="fas fa-tachometer-alt me-2 text-success"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('users.profile') }}"><i class="fas fa-user me-2 text-success"></i>Profile</a></li>
+              {% if current_user.is_farmer %}
+                <li><a class="dropdown-item" href="{{ url_for('products.add_product') }}"><i class="fas fa-plus me-2 text-success"></i>Add Product</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('orders.farmer_orders') }}"><i class="fas fa-boxes me-2 text-success"></i>Manage Orders</a></li>
+              {% else %}
+                <li><a class="dropdown-item" href="{{ url_for('orders.my_orders') }}"><i class="fas fa-box me-2 text-success"></i>My Orders</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"/></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-success btn-sm px-3" href="{{ url_for('auth.register') }}">Register</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div class="container mt-2">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+{% block content %}{% endblock %}
+
+<!-- FOOTER -->
+<footer class="footer mt-5 pt-5 pb-3 bg-dark text-white">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <h5 class="d-flex align-items-center gap-2">🌾 Harvest<span class="text-success">IQ</span></h5>
+        <p class="text-muted small">Connecting Filipino farmers directly to buyers. Fresh, fair, and local.</p>
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <h6 class="text-uppercase text-muted small fw-bold">Shop</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{{ url_for('products.list_products') }}" class="text-muted text-decoration-none">All Products</a></li>
+          <li><a href="{{ url_for('search.search') }}?organic=1" class="text-muted text-decoration-none">Organic</a></li>
+        </ul>
+      </div>
+      <div class="col-md-2">
+        <h6 class="text-uppercase text-muted small fw-bold">Sell</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{{ url_for('auth.register') }}" class="text-muted text-decoration-none">Become a Farmer</a></li>
+          <li><a href="#" class="text-muted text-decoration-none">Seller Guide</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h6 class="text-uppercase text-muted small fw-bold">Payment Methods</h6>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="badge bg-secondary">COD</span>
+          <span class="badge bg-primary">GCash</span>
+          <span class="badge bg-info text-dark">Maya</span>
+          <span class="badge bg-warning text-dark">Visa/MC</span>
+          <span class="badge bg-success">Bank Transfer</span>
+        </div>
+      </div>
+    </div>
+    <hr class="border-secondary mt-4"/>
+    <div class="text-center text-muted small">
+      &copy; {{ now.year if now else 2024 }} Harvest IQ. All rights reserved. | Made with ❤️ for Filipino Farmers
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

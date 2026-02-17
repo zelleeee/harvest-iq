@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <div class="card border-0 shadow-lg auth-card">
+          <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+              <div class="auth-logo">🌾</div>
+              <h2 class="fw-bold">Create Account</h2>
+              <p class="text-muted">Join the Harvest IQ community</p>
+            </div>
+
+            <!-- Role Toggle -->
+            <div class="role-toggle mb-4">
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="radio" class="btn-check" name="roleToggle" id="rolebuyer" value="buyer" checked/>
+                  <label class="btn btn-outline-success w-100" for="rolebuyer">
+                    <i class="fas fa-shopping-bag me-2"></i>I'm a Buyer
+                  </label>
+                </div>
+                <div class="col-6">
+                  <input type="radio" class="btn-check" name="roleToggle" id="rolefarmer" value="farmer"/>
+                  <label class="btn btn-outline-success w-100" for="rolefarmer">
+                    <i class="fas fa-tractor me-2"></i>I'm a Farmer
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <form method="POST" id="registerForm">
+              <input type="hidden" name="role" id="roleInput" value="buyer"/>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Full Name</label>
+                  <input type="text" class="form-control" name="full_name" required placeholder="Juan dela Cruz"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Username</label>
+                  <input type="text" class="form-control" name="username" required placeholder="juanfarmer"/>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Email Address</label>
+                  <input type="email" class="form-control" name="email" required placeholder="juan@email.com"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Phone Number</label>
+                  <input type="tel" class="form-control" name="phone" placeholder="09XXXXXXXXX"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Region</label>
+                  <select class="form-select" name="region">
+                    <option value="">Select region...</option>
+                    {% for region in ['NCR','CAR','Region I','Region II','Region III','Region IV-A','Region IV-B','Region V','Region VI','Region VII','Region VIII','Region IX','Region X','Region XI','Region XII','Region XIII','BARMM'] %}
+                    <option value="{{ region }}">{{ region }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Password</label>
+                  <input type="password" class="form-control" name="password" required placeholder="Min. 8 characters"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Confirm Password</label>
+                  <input type="password" class="form-control" name="confirm_password" required placeholder="Repeat password"/>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="termsCheck" required/>
+                    <label class="form-check-label small" for="termsCheck">
+                      I agree to the <a href="#" class="text-success">Terms of Service</a> and <a href="#" class="text-success">Privacy Policy</a>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold mt-4">Create Account</button>
+            </form>
+            <p class="text-center text-muted mt-3 mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold">Sign In</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[name="roleToggle"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.getElementById('roleInput').value = this.value;
+  });
+});
+</script>
+{% endblock %}
