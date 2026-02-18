@@ -33,40 +33,91 @@
 
             <form method="POST" id="registerForm">
               <input type="hidden" name="role" id="roleInput" value="buyer"/>
+              
               <div class="row g-3">
+                <!-- Full Name -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Full Name</label>
+                  <label class="fw-semibold small">Full Name <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" name="full_name" required placeholder="Juan dela Cruz"/>
                 </div>
+
+                <!-- Username -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Username</label>
+                  <label class="fw-semibold small">Username <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" name="username" required placeholder="juanfarmer"/>
                 </div>
-                <div class="col-12">
-                  <label class="form-label fw-semibold">Email Address</label>
-                  <input type="email" class="form-control" name="email" required placeholder="juan@email.com"/>
+                
+                <!-- Email (Required for Buyers, Optional for Farmers) -->
+                <div class="col-12" id="emailField">
+                  <label class="fw-semibold small">
+                    Email Address <span class="text-danger" id="emailRequired">*</span>
+                  </label>
+                  <input type="email" class="form-control" name="email" id="emailInput" 
+                         required placeholder="juan@email.com"/>
+                  <small class="text-muted d-none" id="emailOptionalNote">
+                    <i class="fas fa-info-circle me-1"></i>Email is optional for farmers
+                  </small>
                 </div>
+                
+                <!-- Phone Number -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Phone Number</label>
-                  <input type="tel" class="form-control" name="phone" placeholder="09XXXXXXXXX"/>
+                  <label class="fw-semibold small">Phone Number <span class="text-danger">*</span></label>
+                  <input type="tel" class="form-control" name="phone" required 
+                         placeholder="09XXXXXXXXX" pattern="09[0-9]{9}"/>
+                  <small class="text-muted">Format: 09XXXXXXXXX</small>
                 </div>
+
+                <!-- Region -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Region</label>
+                  <label class="fw-semibold small">Region</label>
                   <select class="form-select" name="region">
                     <option value="">Select region...</option>
-                    {% for region in ['NCR','CAR','Region I','Region II','Region III','Region IV-A','Region IV-B','Region V','Region VI','Region VII','Region VIII','Region IX','Region X','Region XI','Region XII','Region XIII','BARMM'] %}
-                    <option value="{{ region }}">{{ region }}</option>
-                    {% endfor %}
+                    <option value="NCR">NCR - National Capital Region</option>
+                    <option value="CAR">CAR - Cordillera Administrative Region</option>
+                    <option value="Region I">Region I - Ilocos Region</option>
+                    <option value="Region II">Region II - Cagayan Valley</option>
+                    <option value="Region III">Region III - Central Luzon</option>
+                    <option value="Region IV-A">Region IV-A - CALABARZON</option>
+                    <option value="Region IV-B">Region IV-B - MIMAROPA</option>
+                    <option value="Region V">Region V - Bicol Region</option>
+                    <option value="Region VI">Region VI - Western Visayas</option>
+                    <option value="Region VII">Region VII - Central Visayas</option>
+                    <option value="Region VIII">Region VIII - Eastern Visayas</option>
+                    <option value="Region IX">Region IX - Zamboanga Peninsula</option>
+                    <option value="Region X">Region X - Northern Mindanao</option>
+                    <option value="Region XI">Region XI - Davao Region</option>
+                    <option value="Region XII">Region XII - SOCCSKSARGEN</option>
+                    <option value="Region XIII">Region XIII - Caraga</option>
+                    <option value="BARMM">BARMM - Bangsamoro</option>
                   </select>
                 </div>
+
+                <!-- Password -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Password</label>
-                  <input type="password" class="form-control" name="password" required placeholder="Min. 8 characters"/>
+                  <label class="fw-semibold small">Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" name="password" id="passwordInput" 
+                           required placeholder="Min. 8 characters"/>
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('passwordInput', 'eyeIcon1')">
+                      <i class="fas fa-eye" id="eyeIcon1"></i>
+                    </button>
+                  </div>
+                  <small class="text-muted">Min. 8 chars, 1 uppercase, 1 number</small>
                 </div>
+
+                <!-- Confirm Password -->
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Confirm Password</label>
-                  <input type="password" class="form-control" name="confirm_password" required placeholder="Repeat password"/>
+                  <label class="fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" name="confirm_password" id="confirmPasswordInput"
+                           required placeholder="Repeat password"/>
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirmPasswordInput', 'eyeIcon2')">
+                      <i class="fas fa-eye" id="eyeIcon2"></i>
+                    </button>
+                  </div>
                 </div>
+
+                <!-- Terms & Conditions -->
                 <div class="col-12">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="termsCheck" required/>
@@ -76,20 +127,89 @@
                   </div>
                 </div>
               </div>
-              <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold mt-4">Create Account</button>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold mt-4">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+              </button>
             </form>
-            <p class="text-center text-muted mt-3 mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold">Sign In</a></p>
+
+            <!-- Login Link -->
+            <p class="text-center text-muted mt-3 mb-0">
+              Already have an account? <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold">Sign In</a>
+            </p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <script>
+// Toggle password visibility
+function togglePassword(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+
+// Handle role toggle and email requirement
 document.querySelectorAll('[name="roleToggle"]').forEach(radio => {
   radio.addEventListener('change', function() {
-    document.getElementById('roleInput').value = this.value;
+    const role = this.value;
+    const emailInput = document.getElementById('emailInput');
+    const emailRequired = document.getElementById('emailRequired');
+    const emailOptionalNote = document.getElementById('emailOptionalNote');
+    
+    // Update hidden role input
+    document.getElementById('roleInput').value = role;
+    
+    if (role === 'farmer') {
+      // Farmers: email is optional
+      emailInput.removeAttribute('required');
+      emailRequired.classList.add('d-none');
+      emailOptionalNote.classList.remove('d-none');
+      emailInput.placeholder = 'email@example.com (optional)';
+    } else {
+      // Buyers: email is required
+      emailInput.setAttribute('required', 'required');
+      emailRequired.classList.remove('d-none');
+      emailOptionalNote.classList.add('d-none');
+      emailInput.placeholder = 'juan@email.com';
+    }
   });
+});
+
+// Password strength indicator (optional enhancement)
+const passwordInput = document.getElementById('passwordInput');
+passwordInput.addEventListener('input', function() {
+  const password = this.value;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const isLongEnough = password.length >= 8;
+  
+  // Visual feedback can be added here if desired
+});
+
+// Match password validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  const password = document.getElementById('passwordInput').value;
+  const confirm = document.getElementById('confirmPasswordInput').value;
+  
+  if (password !== confirm) {
+    e.preventDefault();
+    alert('Passwords do not match!');
+    return false;
+  }
 });
 </script>
 {% endblock %}

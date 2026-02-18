@@ -3,37 +3,39 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
+from flask_socketio import SocketIO
 from config.development import DevelopmentConfig
-from app.locales import get_locale
 
-# 1. Initialize extensions globally
+# ─── Initialize Extensions ────────────────────────────────────────────────────
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 mail = Mail()
+socketio = SocketIO()
+
+
+# ─── Application Factory ──────────────────────────────────────────────────────
 
 def create_app(config=DevelopmentConfig):
-    # 2. Create the app instance
+    """Create and configure the Flask application."""
     app = Flask(__name__)
     app.config.from_object(config)
 
-    # 3. Bind extensions to the app instance
+    # Initialize extensions with app
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     mail.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
 
+    # Configure Flask-Login
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
 
-    # 4. MOVED: Context Processor now lives inside the function
-    @app.context_processor
-    def inject_locale():
-        from flask import session
-        lang = session.get('lang', 'en')
-        return {'t': get_locale(lang), 'lang': lang}
+    # ─── Register Blueprints ──────────────────────────────────────────────────
 
-    # 5. Register Blueprints
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
     from app.routes.orders import orders_bp
@@ -41,6 +43,8 @@ def create_app(config=DevelopmentConfig):
     from app.routes.search import search_bp
     from app.routes.cart import cart_bp
     from app.routes.payment import payment_bp
+    from app.routes.messages import messages_bp
+    from app.routes.main import main_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(products_bp, url_prefix='/products')
@@ -49,11 +53,44 @@ def create_app(config=DevelopmentConfig):
     app.register_blueprint(search_bp, url_prefix='/search')
     app.register_blueprint(cart_bp, url_prefix='/cart')
     app.register_blueprint(payment_bp, url_prefix='/payment')
-
-    from app.routes.main import main_bp
+    app.register_blueprint(messages_bp, url_prefix='/messages')
     app.register_blueprint(main_bp)
 
-    # 6. Database and Seeding
+    # ─── Socket.IO Events ─────────────────────────────────────────────────────
+
+    from app import socketio_events
+
+    # ─── Context Processors ───────────────────────────────────────────────────
+
+    from app.locales import get_locale
+    from flask import session
+    from flask_login import current_user
+    from datetime import datetime
+
+    @app.context_processor
+    def inject_globals():
+        """Inject global variables available in ALL templates."""
+        lang = session.get('lang', 'en')
+        
+        # Calculate unread message count
+        unread_count = 0
+        if current_user.is_authenticated:
+            from app.models.message import Conversation
+            conversations = Conversation.query.filter(
+                (Conversation.buyer_id == current_user.id) | 
+                (Conversation.farmer_id == current_user.id)
+            ).all()
+            unread_count = sum(c.unread_count(current_user.id) for c in conversations)
+        
+        return {
+            't': get_locale(lang),
+            'lang': lang,
+            'now': datetime.utcnow(),
+            'unread_messages': unread_count
+        }
+
+    # ─── Database Initialization ──────────────────────────────────────────────
+
     with app.app_context():
         db.create_all()
         from app.utils.helpers import seed_categories
